@@ -1,6 +1,6 @@
+# Flask
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
-
 
 # Extract stock market data
 from func import fetch_data, check_columns, check_values, expand_data, final_data, get_return, \
@@ -16,12 +16,12 @@ import datetime as dt  # Datetime manipulation
 
 
 # Flask App
-app = Flask(__name__, template_folder='template')
+app = Flask(__name__, template_folder = 'template')
 CORS(app)
 
 
 # Routing
-@app.route('/getData', methods=['POST'])
+@app.route('/getData', methods = ['POST'])
 def getData():
     content_type = request.headers.get('Content-Type')
     if (content_type == 'application/json'):
@@ -34,14 +34,14 @@ def getData():
             start_date = '2021-01-01'
 
         end_date = dt.datetime.now().strftime('%Y-%m-%d')
-        stock = fetch_data(stock=stock_name,
-                           start_date=start_date,
-                           end_date=end_date)
+        stock = fetch_data(stock = stock_name,
+                           start_date = start_date,
+                           end_date = end_date)
 
-        stock = final_data(data=stock,
-                           start_date=start_date,
-                           end_date=end_date,
-                           criteria=criteria)
+        stock = final_data(data = stock,
+                           start_date = start_date,
+                           end_date = end_date,
+                           criteria = criteria)
 
         stock = stock.reset_index()
 
@@ -69,22 +69,22 @@ def simulateStock():
             start_date = '2021-01-01'
 
         end_date = dt.datetime.now().strftime('%Y-%m-%d')
-        stock = fetch_data(stock=stock_name,
-                           start_date=start_date,
-                           end_date=end_date)
+        stock = fetch_data(stock = stock_name,
+                           start_date = start_date,
+                           end_date = end_date)
 
-        stock = final_data(data=stock,
-                           start_date=start_date,
-                           end_date=end_date,
-                           criteria=criteria)
+        stock = final_data(data = stock,
+                           start_date = start_date,
+                           end_date = end_date,
+                           criteria = criteria)
 
         stock = get_return(stock)
 
-        price = simulation(data=stock,
-                           days=days,
-                           n_sim=n_sim)
+        price = simulation(data = stock,
+                           days = days,
+                           n_sim = n_sim)
 
-        decisions = trading_algo(mrx=price)
+        decisions = trading_algo(mrx = price)
         decision_sequence = generate_decision_sequence(decisions, n_sim, days)
 
         estimated_sequence_trading = []
