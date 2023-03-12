@@ -51,9 +51,11 @@ def getData():
                            start_date = start_date,
                            end_date = end_date, 
                            criteria = criteria)
+        stock = stock.reset_index()
 
-        dct = {'date': list(stock.index.values),
-               'values': list(stock.iloc[:, 0])}
+
+        dct = {'date': list(stock.iloc[:, 0]),
+               'values': list(stock.iloc[:, 1])}
         
         return jsonify(dct)
 
@@ -61,21 +63,43 @@ def getData():
         return 'Invalid.'
 
 
-# @app.route('/stockSim', methods = ['POST'])
-# def stockSim():
-#     content_type = request.headers.get('Content-Type')
-#     if (content_type == 'application/json'):
-#         req = request.get_json()
-#         stocks_id = req['StockCode']
-#         stocks_description = req['Description']
+@app.route('/simulateStock', methods = ['POST'])
+def simulateStock():
+    content_type = request.headers.get('Content-Type')
+    if (content_type == 'application/json'):    
+        req = request.get_json()
+        stock_name = req['stock']
+        criteria = req['criteria']
+        start_date = req['start_date']
+        n_sim = req['n_sim']
+        days = req['days']
 
-#         update_users_stocks(id = stocks_id, 
-#                             name = 'stock', 
-#                             description = stocks_description)
-#         return jsonify(req)
+        if start_date == '':
+            start_date = '2021-01-01'
 
-#     else:
-#         return 'Invalid.'
+        end_date = dt.datetime.now().strftime('%Y-%m-%d')
+        stock = fetch_data(stock = stock_name,
+                           start_date = start_date,
+                           end_date = end_date)
+        
+        stock = final_data(data = stock, 
+                           start_date = start_date,
+                           end_date = end_date, 
+                           criteria = criteria)
+
+        stock = get_return(stock)
+
+        price = simulation(data = stock, 
+                           days = days, 
+                           n_sim = n_sim)
+        
+        decision = trading_algo(mrx = price)
+
+        
+        return jsonify(dct)
+
+    else:
+        return 'Invalid.'
 
 
 if __name__ == '__main__':

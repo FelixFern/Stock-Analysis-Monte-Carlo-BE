@@ -104,12 +104,12 @@ def get_return(data):
     
     data = data.dropna()
 
-    sns.displot(data['Daily Return'].dropna(),
-                bins = 50,
-                color = 'blue',
-                kde = True)
-    plt.title('Daily return distribution')
-    plt.show()
+    # sns.displot(data['Daily Return'].dropna(),
+    #             bins = 50,
+    #             color = 'blue',
+    #             kde = True)
+    # plt.title('Daily return distribution')
+    # plt.show()
 
     return data
 
@@ -142,16 +142,16 @@ def simulation(data, days, n_sim):
 
         return price
 
-    plt.figure(figsize = (15, 8))
-    for i in range(n_sim):
-        result = monte_carlo(start_price, days)
-        table[i] = result
-        sim[i] = result[days - 1]
-        plt.plot(result)
+    # plt.figure(figsize = (15, 8))
+    # for i in range(n_sim):
+    #     result = monte_carlo(start_price, days)
+    #     table[i] = result
+    #     sim[i] = result[days - 1]
+    #     plt.plot(result)
 
-    plt.xlabel('Days')
-    plt.ylabel('Price')
-    plt.title('Monte Carlo Analysis')
+    # plt.xlabel('Days')
+    # plt.ylabel('Price')
+    # plt.title('Monte Carlo Analysis')
 
     return table
 
