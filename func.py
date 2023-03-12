@@ -7,8 +7,6 @@ import pandas as pd
 
 # Data manipulation
 import numpy as np
-import re  # Cleaning texts
-import time
 import datetime as dt  # Datetime manipulation
 
 # Plotting

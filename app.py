@@ -1,10 +1,6 @@
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 
-import os
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-
 # Extract stock market data
 from func import fetch_data, check_columns, check_values, expand_data, final_data, get_return, \
                  simulation, generate_decision_sequence, trading_algo, trading_sim
@@ -15,8 +11,6 @@ import pandas as pd
 
 # Data manipulation
 import numpy as np
-import re  # Cleaning texts
-import time
 import datetime as dt  # Datetime manipulation
 
 
