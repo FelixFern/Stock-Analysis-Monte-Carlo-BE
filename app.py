@@ -115,11 +115,12 @@ def simulateStock():
                                                'decision': decision})
             
             data.append({'simulation': idx + 1,
-                         'data': price[idx],
-                         'trading_sequence': decision[idx]})
+                         'data': {'date': list(stock.reset_index().iloc[:, 0]),
+                                  'price': list(price[idx])},
+                         'trading_sequence': decisions[idx]})
             
-            dct = {'estimated_sequence_trading': estimated_sequence_trading,
-                   'data': data} 
+        dct = {'estimated_sequence_trading': estimated_sequence_trading,
+               'data': data} 
             
         return jsonify(dct)
 
