@@ -6,7 +6,8 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 # Extract stock market data
-from func import fetch_data, check_columns, check_values, expand_data, final_data, get_return, simulation, trading_algo, trading_sim
+from func import fetch_data, check_columns, check_values, expand_data, final_data, get_return, \
+                 simulation, generate_decision_sequence, trading_algo, trading_sim
 import yfinance as yf
 
 # Importing and transforming file
@@ -51,8 +52,8 @@ def getData():
                            start_date = start_date,
                            end_date = end_date, 
                            criteria = criteria)
+        
         stock = stock.reset_index()
-
 
         dct = {'date': list(stock.iloc[:, 0]),
                'values': list(stock.iloc[:, 1])}
@@ -93,9 +94,33 @@ def simulateStock():
                            days = days, 
                            n_sim = n_sim)
         
-        decision = trading_algo(mrx = price)
+        decisions = trading_algo(mrx = price)
+        decision_sequence = generate_decision_sequence(decisions, n_sim, days)
 
-        
+        estimated_sequence_trading = []
+        data = []
+        for idx in range(len(decision_sequence)):
+            decision = decision_sequence['DECISION'].iloc[idx]
+            
+            if decision == 0:
+                conf = decision_sequence['HOLD_CONF'].iloc[idx]
+
+            elif decision == 1:
+                conf = decision_sequence['SELL_CONF'].iloc[idx]
+
+            else:
+                conf = decision_sequence['BUY_CONF'].iloc[idx]
+
+            estimated_sequence_trading.append({'conf': conf,
+                                               'decision': decision})
+            
+            data.append({'simulation': idx + 1,
+                         'data': price[idx],
+                         'trading_sequence': decision[idx]})
+            
+            dct = {'estimated_sequence_trading': estimated_sequence_trading,
+                   'data': data} 
+            
         return jsonify(dct)
 
     else:
