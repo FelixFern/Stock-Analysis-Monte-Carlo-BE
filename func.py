@@ -20,9 +20,9 @@ plt.style.use('ggplot')
 
 def fetch_data(stock, start_date, end_date):
     data = yf.download(stock,
-                       start = start_date,
-                       end = end_date,
-                       progress = False)
+                       start=start_date,
+                       end=end_date,
+                       progress=False)
 
     data = data.reset_index()
     return data
@@ -58,18 +58,18 @@ def check_values(data):
 def expand_data(data, start_date, end_date):
     # Create temporary dataframe
     temp = pd.DataFrame()
-    temp['Date'] = pd.date_range(start = start_date,
-                                 end = end_date)
+    temp['Date'] = pd.date_range(start=start_date,
+                                 end=end_date)
 
     # Merge the data
-    res = pd.merge(temp, data, how = 'left', on = 'Date')
+    res = pd.merge(temp, data, how='left', on='Date')
 
     # Interpolate the missing values
     # IDR/USD dataset
     a = res.rolling(3).mean()
     b = res.iloc[::-1].rolling(3).mean()
 
-    c = a.fillna(b).fillna(res).interpolate(method = 'nearest').ffill().bfill()
+    c = a.fillna(b).fillna(res).interpolate(method='nearest').ffill().bfill()
 
     res = res.fillna(c)
 
@@ -81,15 +81,15 @@ def expand_data(data, start_date, end_date):
 
 def final_data(data, start_date, end_date, criteria):
     # Check columns type
-    data = check_columns(data = data)
+    data = check_columns(data=data)
 
     # Check null and negative values
-    data = check_values(data = data)
+    data = check_values(data=data)
 
     # Expand and interpolate
-    data = expand_data(data = data, 
-                       start_date = start_date, 
-                       end_date = end_date)
+    data = expand_data(data=data,
+                       start_date=start_date,
+                       end_date=end_date)
 
     data = data.set_index('Date')
 
@@ -99,7 +99,7 @@ def final_data(data, start_date, end_date, criteria):
 def get_return(data):
     data['Daily Return'] = (
         data.iloc[:, 0] - data.iloc[:, 0].shift(1)) / data.iloc[:, 0].shift(1)
-    
+
     data = data.dropna()
 
     # sns.displot(data['Daily Return'].dropna(),
@@ -124,7 +124,7 @@ def simulation(data, days, n_sim):
     mu = data['Daily Return'].mean()
     sigma = data['Daily Return'].std()
 
-    def monte_carlo(start_price, days, mu = mu, sigma = sigma):
+    def monte_carlo(start_price, days, mu=mu, sigma=sigma):
         price = np.zeros(days)
         price[0] = start_price
 
@@ -133,7 +133,7 @@ def simulation(data, days, n_sim):
 
         for x in range(1, days):
             shock[x] = np.random.normal(
-                loc = mu * delta, scale = sigma * np.sqrt(delta))
+                loc=mu * delta, scale=sigma * np.sqrt(delta))
             drift[x] = mu * delta
 
             price[x] = price[x - 1] + (price[x - 1] * (drift[x] + shock[x]))
@@ -168,7 +168,10 @@ def trading_algo(mrx):
 
     for i in range(n_sim):
         j = 1
+        print("Simulation : ", i)
+
         while j != mrx.shape[1] - 1:
+            print(j)
             start = j
             cond = True
 
@@ -228,8 +231,8 @@ def trading_sim(price, decision, money):
     res = np.zeros(price.shape[0])
     n_sim = price.shape[0]
     days = price.shape[1]
-    result_df = pd.DataFrame(columns = ['SIMULATION', 'PROFIT/LOSS', 'FINAL_BALANCE', 'STARTING_BALANCE'], 
-                             index = [i for i in range(n_sim)])
+    result_df = pd.DataFrame(columns=['SIMULATION', 'PROFIT/LOSS', 'FINAL_BALANCE', 'STARTING_BALANCE'],
+                             index=[i for i in range(n_sim)])
 
     for i in range(n_sim):
         # Initial stock at hand
@@ -277,8 +280,8 @@ def trading_sim(price, decision, money):
 
 
 def generate_decision_sequence(data, n_sim, days):
-    decision_df = pd.DataFrame(columns = ['DAY', 'DECISION', 'HOLD_CONF', 'BUY_CONF', 'SELL_CONF'], 
-                               index = [i for i in range(days)])
+    decision_df = pd.DataFrame(columns=['DAY', 'DECISION', 'HOLD_CONF', 'BUY_CONF', 'SELL_CONF'],
+                               index=[i for i in range(days)])
 
     for i in range(days):
         decision_df['DAY'].iloc[i] = i + 1
@@ -289,7 +292,7 @@ def generate_decision_sequence(data, n_sim, days):
         for j in range(n_sim):
             if data[j, i] == 0:
                 hold += 1
-                
+
             elif data[j, i] == 1:
                 sell += 1
 
