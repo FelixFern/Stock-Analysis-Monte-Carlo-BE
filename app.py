@@ -35,7 +35,7 @@ class SimulatePayload(BaseModel):
     days: int
 
 
-class SimulateTrade(BaseModel):
+class TradePayload(BaseModel):
     stock: str
     criteria: str
     start_date: str
@@ -135,7 +135,7 @@ def simulateStock(req: SimulatePayload):
 
 
 @app.post('/trade')
-async def getData(req: GetDataPayload):
+async def simulateTrade(req: TradePayload):
     stock_name = req.stock
     criteria = req.criteria
     start_date = req.start_date
@@ -159,9 +159,16 @@ async def getData(req: GetDataPayload):
                        criteria=criteria)
 
     stock = get_return(stock)
-    price = simulation(data = stock, days = days, n_sim = n_sim)
 
-    final_sim = trading_sim(price = price, decision = optimal_trading_sequence, money = money)
+    # Kalau pakai data baru
+    price = simulation(data=stock, 
+                       days=days, 
+                       n_sim=n_sim)
+
+
+    final_sim = trading_sim(price=price, 
+                            decision=optimal_trading_sequence, 
+                            money=money)
     
     data = []
     for i in range(n_sim):
@@ -174,5 +181,5 @@ async def getData(req: GetDataPayload):
                      'starting_balance': starting_balance})
 
     dct = {'data': data}
-    
+
     return dct
