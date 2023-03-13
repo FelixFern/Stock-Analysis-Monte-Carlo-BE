@@ -314,13 +314,15 @@ def trading_sim(price, decision, money):
 
 
 def validate_decision(data, days, decision, money, n_sim, n_valid):
-    df = pd.DataFrame(columns = ['SIMULATION', 'WINNING_PERC', 'MAX_RETURN', 'MIN_RETURN'],
+    df = pd.DataFrame(columns=['SIMULATION', 'WINNING_PERC', 'MAX_RETURN', 'MIN_RETURN'],
                       index=[i for i in range(n_valid)])
     for i in range(n_valid):
-        validate = simulation(data = data, days = days, n_sim = n_sim)
-        validate_sim = trading_sim(price = validate, decision = decision, money = money)
+        validate = simulation(data=data, days=days, n_sim=n_sim)
+        validate_sim = trading_sim(
+            price=validate, decision=decision, money=money)
 
-        winning = len(validate_sim.loc[validate_sim['PROFIT/LOSS'] >= 0]) / len(validate_sim) * 100
+        winning = len(
+            validate_sim.loc[validate_sim['PROFIT/LOSS'] >= 0]) / len(validate_sim) * 100
         max_return = np.max(validate_sim['PROFIT/LOSS'])
         min_return = np.min(validate_sim['PROFIT/LOSS'])
 

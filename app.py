@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from pydantic import BaseModel
 
 # Extract stock market data
@@ -14,6 +16,19 @@ import numpy as np
 import datetime as dt  # Datetime manipulation
 
 app = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -45,7 +60,7 @@ class TradePayload(BaseModel):
     money: int
 
 
-@app.get('/get')
+@app.post('/get')
 async def getData(req: GetDataPayload):
     stock_name = req.stock
     criteria = req.criteria
@@ -127,7 +142,7 @@ def simulateStock(req: SimulatePayload):
                      'data': {'date': list(stock.iloc[:, 0]),
                               'price': list(price[idx])},
                      'trading_sequence': list(decisions[idx])})
-        
+
     dct = {'optimal_trading_sequence': optimal_trading_sequence,
            'data': data}
 
@@ -161,15 +176,14 @@ async def simulateTrade(req: TradePayload):
     stock = get_return(stock)
 
     # Kalau pakai data baru
-    price = simulation(data=stock, 
-                       days=days, 
+    price = simulation(data=stock,
+                       days=days,
                        n_sim=n_sim)
 
-
-    final_sim = trading_sim(price=price, 
-                            decision=optimal_trading_sequence, 
+    final_sim = trading_sim(price=price,
+                            decision=optimal_trading_sequence,
                             money=money)
-    
+
     data = []
     for i in range(n_sim):
         profit = final_sim['PROFIT/LOSS'].iloc[i]
