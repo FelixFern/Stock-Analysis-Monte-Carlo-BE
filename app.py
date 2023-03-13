@@ -90,34 +90,35 @@ def simulateStock(req: SimulatePayload):
     price = simulation(data=stock,
                        days=days,
                        n_sim=n_sim)
-    print("BREAKPOINT")
     decisions = trading_algo(mrx=price)
-    # decision_sequence = generate_decision_sequence(decisions, n_sim, days)
+    decision_sequence = generate_decision_sequence(decisions, n_sim, days)
 
-    # estimated_sequence_trading = []
-    # data = []
-    # for idx in range(len(decision_sequence)):
-    #     print(idx)
-    #     decision = decision_sequence['DECISION'].iloc[idx]
+    estimated_sequence_trading = []
+    data = []
 
-    #     if decision == 0:
-    #         conf = decision_sequence['HOLD_CONF'].iloc[idx]
+    stock = stock.reset_index()
+    stock["Date"] = stock["Date"].astype(str)
+    for idx in range(len(decision_sequence)):
+        print(idx)
+        decision = decision_sequence['DECISION'].iloc[idx]
 
-    #     elif decision == 1:
-    #         conf = decision_sequence['SELL_CONF'].iloc[idx]
+        if decision == 0:
+            conf = decision_sequence['HOLD_CONF'].iloc[idx]
 
-    #     else:
-    #         conf = decision_sequence['BUY_CONF'].iloc[idx]
+        elif decision == 1:
+            conf = decision_sequence['SELL_CONF'].iloc[idx]
 
-    #     estimated_sequence_trading.append({'conf': conf,
-    #                                        'decision': decision})
+        else:
+            conf = decision_sequence['BUY_CONF'].iloc[idx]
 
-    #     data.append({'simulation': idx + 1,
-    #                  'data': {'date': list(stock.reset_index().iloc[:, 0]),
-    #                           'price': list(price[idx])},
-    #                  'trading_sequence': decisions[idx]})
+        estimated_sequence_trading.append({'conf': conf,
+                                           'decision': decision})
 
-    # dct = {'estimated_sequence_trading': estimated_sequence_trading,
-    #        'data': data}
-    dct = {"message": "test"}
+        data.append({'simulation': idx + 1,
+                     'data': {'date': list(stock.iloc[:, 0]),
+                              'price': list(price[idx])},
+                     'trading_sequence': list(decisions[idx])})
+    dct = {'estimated_sequence_trading': estimated_sequence_trading,
+           'data': data}
+    # dct = {"message": "test"}
     return dct

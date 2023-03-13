@@ -140,16 +140,11 @@ def simulation(data, days, n_sim):
 
         return price
 
-    # plt.figure(figsize = (15, 8))
-    # for i in range(n_sim):
-    #     result = monte_carlo(start_price, days)
-    #     table[i] = result
-    #     sim[i] = result[days - 1]
-    #     plt.plot(result)
-
-    # plt.xlabel('Days')
-    # plt.ylabel('Price')
-    # plt.title('Monte Carlo Analysis')
+    for i in range(n_sim):
+        result = monte_carlo(start_price, days)
+        table[i] = result
+        sim[i] = result[days - 1]
+        plt.plot(result)
 
     return table
 
@@ -168,10 +163,7 @@ def trading_algo(mrx):
 
     for i in range(n_sim):
         j = 1
-        print("Simulation : ", i)
-
         while j != mrx.shape[1] - 1:
-            print(j)
             start = j
             cond = True
 
