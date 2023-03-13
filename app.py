@@ -93,7 +93,7 @@ def simulateStock(req: SimulatePayload):
     decisions = trading_algo(mrx=price)
     decision_sequence = generate_decision_sequence(decisions, n_sim, days)
 
-    estimated_sequence_trading = []
+    optimal_trading_sequence = []
     data = []
 
     stock = stock.reset_index()
@@ -111,14 +111,14 @@ def simulateStock(req: SimulatePayload):
         else:
             conf = decision_sequence['BUY_CONF'].iloc[idx]
 
-        estimated_sequence_trading.append({'conf': conf,
-                                           'decision': decision})
+        optimal_trading_sequence.append({'conf': conf,
+                                         'decision': decision})
 
         data.append({'simulation': idx + 1,
                      'data': {'date': list(stock.iloc[:, 0]),
                               'price': list(price[idx])},
                      'trading_sequence': list(decisions[idx])})
-    dct = {'estimated_sequence_trading': estimated_sequence_trading,
+    dct = {'optimal_trading_sequence': optimal_trading_sequence,
            'data': data}
     # dct = {"message": "test"}
     return dct
