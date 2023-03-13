@@ -140,11 +140,16 @@ def simulation(data, days, n_sim):
 
         return price
 
+    # plt.figure(figsize = (15, 8))
     for i in range(n_sim):
         result = monte_carlo(start_price, days)
         table[i] = result
         sim[i] = result[days - 1]
-        plt.plot(result)
+    #     plt.plot(result)
+
+    # plt.xlabel('Days')
+    # plt.ylabel('Price')
+    # plt.title('Monte Carlo Analysis')
 
     return table
 
@@ -163,7 +168,10 @@ def trading_algo(mrx):
 
     for i in range(n_sim):
         j = 1
+        print("Simulation : ", i)
+
         while j != mrx.shape[1] - 1:
+            print(j)
             start = j
             cond = True
 
@@ -212,6 +220,42 @@ def trading_algo(mrx):
                             cond = False
 
     return res
+
+
+def generate_decision_sequence(data, n_sim, days):
+    decision_df = pd.DataFrame(columns=['DAY', 'DECISION', 'HOLD_CONF', 'BUY_CONF', 'SELL_CONF'],
+                               index=[i for i in range(days)])
+
+    for i in range(days):
+        decision_df['DAY'].iloc[i] = i + 1
+        buy = 0
+        sell = 0
+        hold = 0
+
+        for j in range(n_sim):
+            if data[j, i] == 0:
+                hold += 1
+
+            elif data[j, i] == 1:
+                sell += 1
+
+            else:
+                buy += 1
+
+        if max(buy, sell, hold) == hold and (hold / n_sim) > 0.5:
+            decision_df['DECISION'].iloc[i] = 0
+
+        elif max(buy, sell) == sell:
+            decision_df['DECISION'].iloc[i] = 1
+
+        else:
+            decision_df['DECISION'].iloc[i] = 2
+
+        decision_df['HOLD_CONF'].iloc[i] = hold / n_sim
+        decision_df['BUY_CONF'].iloc[i] = buy / n_sim
+        decision_df['SELL_CONF'].iloc[i] = sell / n_sim
+
+    return decision_df
 
 
 def trading_sim(price, decision, money):
@@ -268,40 +312,23 @@ def trading_sim(price, decision, money):
 
     return result_df
 
+
+def validate_decision(data, days, decision, money, n_sim, n_valid):
+    df = pd.DataFrame(columns = ['SIMULATION', 'WINNING_PERC', 'MAX_RETURN', 'MIN_RETURN'],
+                      index=[i for i in range(n_valid)])
+    for i in range(n_valid):
+        validate = simulation(data = data, days = days, n_sim = n_sim)
+        validate_sim = trading_sim(price = validate, decision = decision, money = money)
+
+        winning = len(validate_sim.loc[validate_sim['PROFIT/LOSS'] >= 0]) / len(validate_sim) * 100
+        max_return = np.max(validate_sim['PROFIT/LOSS'])
+        min_return = np.min(validate_sim['PROFIT/LOSS'])
+
+        df['SIMULATION'].iloc[i] = i + 1
+        df['WINNING_PERC'].iloc[i] = winning
+        df['MAX_RETURN'].iloc[i] = max_return
+        df['MIN_RETURN'].iloc[i] = min_return
+
+    return df
+
 # ------------------------------------------------------------------------------------------------- #
-
-
-def generate_decision_sequence(data, n_sim, days):
-    decision_df = pd.DataFrame(columns=['DAY', 'DECISION', 'HOLD_CONF', 'BUY_CONF', 'SELL_CONF'],
-                               index=[i for i in range(days)])
-
-    for i in range(days):
-        decision_df['DAY'].iloc[i] = i + 1
-        buy = 0
-        sell = 0
-        hold = 0
-
-        for j in range(n_sim):
-            if data[j, i] == 0:
-                hold += 1
-
-            elif data[j, i] == 1:
-                sell += 1
-
-            else:
-                buy += 1
-
-        if max(buy, sell, hold) == hold and (hold / n_sim) > 0.5:
-            decision_df['DECISION'].iloc[i] = 0
-
-        elif max(buy, sell) == sell:
-            decision_df['DECISION'].iloc[i] = 1
-
-        else:
-            decision_df['DECISION'].iloc[i] = 2
-
-        decision_df['HOLD_CONF'].iloc[i] = hold / n_sim
-        decision_df['BUY_CONF'].iloc[i] = buy / n_sim
-        decision_df['SELL_CONF'].iloc[i] = sell / n_sim
-
-    return decision_df

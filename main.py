@@ -1,6 +1,7 @@
 # Import modules
 # Extract stock market data
-from func import fetch_data, check_columns, check_values, expand_data, final_data, get_return, simulation, trading_algo, trading_sim
+from func import fetch_data, check_columns, check_values, expand_data, final_data, get_return, \
+    simulation, generate_decision_sequence, trading_algo, trading_sim, validate_decision
 import yfinance as yf
 
 # Importing and transforming file

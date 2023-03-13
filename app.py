@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 # Extract stock market data
 from func import fetch_data, check_columns, check_values, expand_data, final_data, get_return, \
-    simulation, generate_decision_sequence, trading_algo, trading_sim
+    simulation, generate_decision_sequence, trading_algo, trading_sim, validate_decision
 import yfinance as yf
 
 # Importing and transforming file
@@ -33,6 +33,16 @@ class SimulatePayload(BaseModel):
     start_date: str
     n_sim: int
     days: int
+
+
+class SimulateTrade(BaseModel):
+    stock: str
+    criteria: str
+    start_date: str
+    n_sim: int
+    days: int
+    optimal_trading_sequence: list
+    money: int
 
 
 @app.get('/get')
@@ -99,7 +109,6 @@ def simulateStock(req: SimulatePayload):
     stock = stock.reset_index()
     stock["Date"] = stock["Date"].astype(str)
     for idx in range(len(decision_sequence)):
-        print(idx)
         decision = decision_sequence['DECISION'].iloc[idx]
 
         if decision == 0:
@@ -118,7 +127,52 @@ def simulateStock(req: SimulatePayload):
                      'data': {'date': list(stock.iloc[:, 0]),
                               'price': list(price[idx])},
                      'trading_sequence': list(decisions[idx])})
+        
     dct = {'optimal_trading_sequence': optimal_trading_sequence,
            'data': data}
-    # dct = {"message": "test"}
+
+    return dct
+
+
+@app.post('/trade')
+async def getData(req: GetDataPayload):
+    stock_name = req.stock
+    criteria = req.criteria
+    start_date = req.start_date
+    n_sim = req.n_sim
+    days = req.days
+    optimal_trading_sequence = req.optimal_trading_sequence
+    money = req.money
+
+    if start_date == '':
+        start_date = '2021-01-01'
+
+    end_date = dt.datetime.now().strftime('%Y-%m-%d')
+
+    stock = fetch_data(stock=stock_name,
+                       start_date=start_date,
+                       end_date=end_date)
+
+    stock = final_data(data=stock,
+                       start_date=start_date,
+                       end_date=end_date,
+                       criteria=criteria)
+
+    stock = get_return(stock)
+    price = simulation(data = stock, days = days, n_sim = n_sim)
+
+    final_sim = trading_sim(price = price, decision = optimal_trading_sequence, money = money)
+    
+    data = []
+    for i in range(n_sim):
+        profit = final_sim['PROFIT/LOSS'].iloc[i]
+        final_balance = final_sim['FINAL_BALANCE'].iloc[i]
+        starting_balance = final_sim['STARTING_BALANCE'].iloc[i]
+
+        data.append({'profit': profit,
+                     'final_balance': final_balance,
+                     'starting_balance': starting_balance})
+
+    dct = {'data': data}
+    
     return dct
