@@ -277,15 +277,13 @@ def trading_sim(price, decision, money):
 
         for j in range(days):
             # Hold
-            if decision['DECISION'].iloc[j] == 0:
+            if decision[j]["decision"] == 0:
                 pass
 
             # Sell
-            elif decision['DECISION'].iloc[j] == 1:
+            elif decision[j]["decision"] == 1:
                 # Proportion of sell decision at given day
-                factor = decision['SELL_CONF'].iloc[j] / \
-                    (decision['SELL_CONF'].iloc[j] +
-                     decision['BUY_CONF'].iloc[j])
+                factor = decision[j]["conf"]
                 curr_price = price[i, j]
                 curr_money += stock * factor * curr_price
                 stock -= stock * factor
@@ -293,9 +291,7 @@ def trading_sim(price, decision, money):
             # Buy
             else:
                 # Proportion of buy decision at given day
-                factor = decision['BUY_CONF'].iloc[j] / \
-                    (decision['SELL_CONF'].iloc[j] +
-                     decision['BUY_CONF'].iloc[j])
+                factor = decision[j]["conf"]
                 curr_price = price[i, j]
                 stock += factor * curr_money / curr_price
                 curr_money -= factor * curr_money

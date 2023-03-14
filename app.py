@@ -121,8 +121,6 @@ def simulateStock(req: SimulatePayload):
     optimal_trading_sequence = []
     data = []
 
-    stock = stock.reset_index()
-    stock["Date"] = stock["Date"].astype(str)
     for idx in range(len(decision_sequence)):
         decision = decision_sequence['DECISION'].iloc[idx]
 
@@ -139,7 +137,7 @@ def simulateStock(req: SimulatePayload):
                                          'decision': decision})
 
         data.append({'simulation': idx + 1,
-                     'data': {'date': list(stock.iloc[:, 0]),
+                     'data': {'date': list(["Days +" + str(i + 1) for i in range(days)]),
                               'price': list(price[idx])},
                      'trading_sequence': list(decisions[idx])})
 
@@ -185,8 +183,11 @@ async def simulateTrade(req: TradePayload):
                             money=money)
 
     data = []
+    win = 0
     for i in range(n_sim):
         profit = final_sim['PROFIT/LOSS'].iloc[i]
+        if (profit >= 0):
+            win += 1
         final_balance = final_sim['FINAL_BALANCE'].iloc[i]
         starting_balance = final_sim['STARTING_BALANCE'].iloc[i]
 
@@ -194,6 +195,29 @@ async def simulateTrade(req: TradePayload):
                      'final_balance': final_balance,
                      'starting_balance': starting_balance})
 
-    dct = {'data': data}
+    val_max_index = np.argmax(final_sim['PROFIT/LOSS'])
+    val_min_index = np.argmin(final_sim['PROFIT/LOSS'])
+    win_rate = win / len(data) * 100
+    lose_rate = 100 - win_rate
+
+    dct = {
+        'data': data,
+        'performance': {
+            'win': float(win_rate),
+            'loss': float(lose_rate),
+            'maximum': {
+                "profit": {
+                    "simulation": int(val_max_index),
+                    "percentage": float(final_sim['PROFIT/LOSS'].iloc[val_max_index]),
+                    "final_balance": float(final_sim['FINAL_BALANCE'].iloc[val_max_index])
+                },
+                "loss": {
+                    "simulation": int(val_min_index),
+                    "percentage": float(final_sim['PROFIT/LOSS'].iloc[val_min_index]),
+                    "final_balance": float(final_sim['FINAL_BALANCE'].iloc[val_min_index])
+                }
+            },
+        }
+    }
 
     return dct
