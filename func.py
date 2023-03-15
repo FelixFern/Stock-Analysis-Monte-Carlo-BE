@@ -277,15 +277,13 @@ def trading_sim(price, decision, money):
 
         for j in range(days):
             # Hold
-            if decision['DECISION'].iloc[j] == 0:
+            if decision[j]["decision"] == 0:
                 pass
 
             # Sell
-            elif decision['DECISION'].iloc[j] == 1:
+            elif decision[j]["decision"] == 1:
                 # Proportion of sell decision at given day
-                factor = decision['SELL_CONF'].iloc[j] / \
-                    (decision['SELL_CONF'].iloc[j] +
-                     decision['BUY_CONF'].iloc[j])
+                factor = decision[j]["conf"]
                 curr_price = price[i, j]
                 curr_money += stock * factor * curr_price
                 stock -= stock * factor
@@ -293,9 +291,7 @@ def trading_sim(price, decision, money):
             # Buy
             else:
                 # Proportion of buy decision at given day
-                factor = decision['BUY_CONF'].iloc[j] / \
-                    (decision['SELL_CONF'].iloc[j] +
-                     decision['BUY_CONF'].iloc[j])
+                factor = decision[j]["conf"]
                 curr_price = price[i, j]
                 stock += factor * curr_money / curr_price
                 curr_money -= factor * curr_money
@@ -317,10 +313,12 @@ def validate_decision(data, days, decision, money, n_sim, n_valid):
     df = pd.DataFrame(columns=['SIMULATION', 'WINNING_PERC', 'MAX_RETURN', 'MIN_RETURN'],
                       index=[i for i in range(n_valid)])
     for i in range(n_valid):
-        validate = simulation(data = data, days = days, n_sim = n_sim)
-        validate_sim = trading_sim(price = validate, decision = decision, money = money)
+        validate = simulation(data=data, days=days, n_sim=n_sim)
+        validate_sim = trading_sim(
+            price=validate, decision=decision, money=money)
 
-        winning = len(validate_sim.loc[validate_sim['PROFIT/LOSS'] >= 0]) / len(validate_sim) * 100
+        winning = len(
+            validate_sim.loc[validate_sim['PROFIT/LOSS'] >= 0]) / len(validate_sim) * 100
         max_return = np.max(validate_sim['PROFIT/LOSS'])
         min_return = np.min(validate_sim['PROFIT/LOSS'])
 
@@ -331,6 +329,7 @@ def validate_decision(data, days, decision, money, n_sim, n_valid):
 
     return df
 
+<<<<<<< HEAD
 
 def stock_var(data, conf_level):
     res = data['PROFIT/LOSS'] / 100
@@ -340,3 +339,6 @@ def stock_var(data, conf_level):
     return var * money
 
 # ------------------------------------------------------------------------------------------------- #
+=======
+# ------------------------------------------------------------------------------------------------- #
+>>>>>>> 6ac25a260c8aa40e21fb5a2b3fa944f876c09c34

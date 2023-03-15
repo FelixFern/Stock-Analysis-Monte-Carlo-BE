@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from pydantic import BaseModel
 
 # Extract stock market data
@@ -14,6 +16,19 @@ import numpy as np
 import datetime as dt  # Datetime manipulation
 
 app = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -47,7 +62,7 @@ class TradePayload(BaseModel):
     conf_level: float
 
 
-@app.get('/get')
+@app.post('/get')
 async def getData(req: GetDataPayload):
     stock_name = req.stock
     criteria = req.criteria
@@ -112,10 +127,15 @@ def simulateStock(req: SimulatePayload):
     optimal_trading_sequence = []
     data = []
 
+<<<<<<< HEAD
     stock = stock.reset_index()
     stock["Date"] = stock["Date"].astype(str)
     for day in range(days):
         decision = decision_sequence['DECISION'].iloc[day]
+=======
+    for idx in range(len(decision_sequence)):
+        decision = decision_sequence['DECISION'].iloc[idx]
+>>>>>>> 6ac25a260c8aa40e21fb5a2b3fa944f876c09c34
 
         if decision == 0:
             conf = decision_sequence['HOLD_CONF'].iloc[day]
@@ -129,6 +149,7 @@ def simulateStock(req: SimulatePayload):
         optimal_trading_sequence.append({'conf': conf,
                                          'decision': decision})
 
+<<<<<<< HEAD
 
     dates = pd.date_range(dt.datetime.today(), periods = days).to_pydatetime().tolist()
     for i in range(len(dates)): 
@@ -140,6 +161,13 @@ def simulateStock(req: SimulatePayload):
                               'price': list(price[sim])},
                      'trading_sequence': list(decisions[sim])})
         
+=======
+        data.append({'simulation': idx + 1,
+                     'data': {'date': list(["Days +" + str(i + 1) for i in range(days)]),
+                              'price': list(price[idx])},
+                     'trading_sequence': list(decisions[idx])})
+
+>>>>>>> 6ac25a260c8aa40e21fb5a2b3fa944f876c09c34
     dct = {'optimal_trading_sequence': optimal_trading_sequence,
            'data': data}
 
@@ -177,18 +205,20 @@ async def simulateTrade(req: TradePayload):
     stock = get_return(stock)
 
     # Kalau pakai data baru
-    price = simulation(data=stock, 
-                       days=days, 
+    price = simulation(data=stock,
+                       days=days,
                        n_sim=n_sim)
 
-
-    final_sim = trading_sim(price=price, 
-                            decision=optimal_trading_sequence, 
+    final_sim = trading_sim(price=price,
+                            decision=optimal_trading_sequence,
                             money=money)
-    
+
     data = []
+    win = 0
     for i in range(n_sim):
         profit = final_sim['PROFIT/LOSS'].iloc[i]
+        if (profit >= 0):
+            win += 1
         final_balance = final_sim['FINAL_BALANCE'].iloc[i]
         starting_balance = final_sim['STARTING_BALANCE'].iloc[i]
 
@@ -196,10 +226,37 @@ async def simulateTrade(req: TradePayload):
                      'final_balance': final_balance,
                      'starting_balance': starting_balance})
 
+<<<<<<< HEAD
     var_value = stock_var(data=final_sim, conf_level=conf_level)
     dct = {'data': data,
            'var': {'conf_level': conf_level,
                    'var': var_value}
                    }
+=======
+    val_max_index = np.argmax(final_sim['PROFIT/LOSS'])
+    val_min_index = np.argmin(final_sim['PROFIT/LOSS'])
+    win_rate = win / len(data) * 100
+    lose_rate = 100 - win_rate
+>>>>>>> 6ac25a260c8aa40e21fb5a2b3fa944f876c09c34
+
+    dct = {
+        'data': data,
+        'performance': {
+            'win': float(win_rate),
+            'loss': float(lose_rate),
+            'maximum': {
+                "profit": {
+                    "simulation": int(val_max_index),
+                    "percentage": float(final_sim['PROFIT/LOSS'].iloc[val_max_index]),
+                    "final_balance": float(final_sim['FINAL_BALANCE'].iloc[val_max_index])
+                },
+                "loss": {
+                    "simulation": int(val_min_index),
+                    "percentage": float(final_sim['PROFIT/LOSS'].iloc[val_min_index]),
+                    "final_balance": float(final_sim['FINAL_BALANCE'].iloc[val_min_index])
+                }
+            },
+        }
+    }
 
     return dct
