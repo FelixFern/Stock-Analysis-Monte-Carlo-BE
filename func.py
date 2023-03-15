@@ -329,7 +329,6 @@ def validate_decision(data, days, decision, money, n_sim, n_valid):
 
     return df
 
-<<<<<<< HEAD
 
 def stock_var(data, conf_level):
     res = data['PROFIT/LOSS'] / 100
@@ -339,6 +338,3 @@ def stock_var(data, conf_level):
     return var * money
 
 # ------------------------------------------------------------------------------------------------- #
-=======
-# ------------------------------------------------------------------------------------------------- #
->>>>>>> 6ac25a260c8aa40e21fb5a2b3fa944f876c09c34

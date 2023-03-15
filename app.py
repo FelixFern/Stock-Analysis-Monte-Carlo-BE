@@ -127,15 +127,10 @@ def simulateStock(req: SimulatePayload):
     optimal_trading_sequence = []
     data = []
 
-<<<<<<< HEAD
     stock = stock.reset_index()
     stock["Date"] = stock["Date"].astype(str)
     for day in range(days):
         decision = decision_sequence['DECISION'].iloc[day]
-=======
-    for idx in range(len(decision_sequence)):
-        decision = decision_sequence['DECISION'].iloc[idx]
->>>>>>> 6ac25a260c8aa40e21fb5a2b3fa944f876c09c34
 
         if decision == 0:
             conf = decision_sequence['HOLD_CONF'].iloc[day]
@@ -149,7 +144,6 @@ def simulateStock(req: SimulatePayload):
         optimal_trading_sequence.append({'conf': conf,
                                          'decision': decision})
 
-<<<<<<< HEAD
 
     dates = pd.date_range(dt.datetime.today(), periods = days).to_pydatetime().tolist()
     for i in range(len(dates)): 
@@ -161,13 +155,6 @@ def simulateStock(req: SimulatePayload):
                               'price': list(price[sim])},
                      'trading_sequence': list(decisions[sim])})
         
-=======
-        data.append({'simulation': idx + 1,
-                     'data': {'date': list(["Days +" + str(i + 1) for i in range(days)]),
-                              'price': list(price[idx])},
-                     'trading_sequence': list(decisions[idx])})
-
->>>>>>> 6ac25a260c8aa40e21fb5a2b3fa944f876c09c34
     dct = {'optimal_trading_sequence': optimal_trading_sequence,
            'data': data}
 
@@ -226,18 +213,11 @@ async def simulateTrade(req: TradePayload):
                      'final_balance': final_balance,
                      'starting_balance': starting_balance})
 
-<<<<<<< HEAD
     var_value = stock_var(data=final_sim, conf_level=conf_level)
-    dct = {'data': data,
-           'var': {'conf_level': conf_level,
-                   'var': var_value}
-                   }
-=======
     val_max_index = np.argmax(final_sim['PROFIT/LOSS'])
     val_min_index = np.argmin(final_sim['PROFIT/LOSS'])
     win_rate = win / len(data) * 100
     lose_rate = 100 - win_rate
->>>>>>> 6ac25a260c8aa40e21fb5a2b3fa944f876c09c34
 
     dct = {
         'data': data,
@@ -254,7 +234,8 @@ async def simulateTrade(req: TradePayload):
                     "simulation": int(val_min_index),
                     "percentage": float(final_sim['PROFIT/LOSS'].iloc[val_min_index]),
                     "final_balance": float(final_sim['FINAL_BALANCE'].iloc[val_min_index])
-                }
+                },
+            'var': var_value
             },
         }
     }
