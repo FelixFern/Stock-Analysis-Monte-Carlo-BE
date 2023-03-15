@@ -140,16 +140,10 @@ def simulation(data, days, n_sim):
 
         return price
 
-    # plt.figure(figsize = (15, 8))
     for i in range(n_sim):
         result = monte_carlo(start_price, days)
         table[i] = result
         sim[i] = result[days - 1]
-    #     plt.plot(result)
-
-    # plt.xlabel('Days')
-    # plt.ylabel('Price')
-    # plt.title('Monte Carlo Analysis')
 
     return table
 
@@ -277,13 +271,15 @@ def trading_sim(price, decision, money):
 
         for j in range(days):
             # Hold
-            if decision[j]["decision"] == 0:
+            if decision['DECISION'].iloc[j] == 0:
                 pass
 
             # Sell
-            elif decision[j]["decision"] == 1:
+            elif decision['DECISION'].iloc[j] == 1:
                 # Proportion of sell decision at given day
-                factor = decision[j]["conf"]
+                factor = decision['SELL_CONF'].iloc[j] / \
+                    (decision['SELL_CONF'].iloc[j] +
+                     decision['BUY_CONF'].iloc[j])
                 curr_price = price[i, j]
                 curr_money += stock * factor * curr_price
                 stock -= stock * factor
@@ -291,7 +287,9 @@ def trading_sim(price, decision, money):
             # Buy
             else:
                 # Proportion of buy decision at given day
-                factor = decision[j]["conf"]
+                factor = decision['BUY_CONF'].iloc[j] / \
+                    (decision['SELL_CONF'].iloc[j] +
+                     decision['BUY_CONF'].iloc[j])
                 curr_price = price[i, j]
                 stock += factor * curr_money / curr_price
                 curr_money -= factor * curr_money

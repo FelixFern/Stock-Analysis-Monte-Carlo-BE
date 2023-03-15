@@ -24,14 +24,14 @@ start_date = '2021-01-01'
 end_date = dt.datetime.now().strftime('%Y-%m-%d')
 
 # Stock
-stock = fetch_data(stock = 'ANTM.JK',
-                   start_date = start_date,
-                   end_date = end_date)
+stock = fetch_data(stock='ANTM.JK',
+                   start_date=start_date,
+                   end_date=end_date)
 
-stock = final_data(data = stock, 
-                   start_date = start_date,
-                   end_date = end_date, 
-                   criteria = 'Adj Close')
+stock = final_data(data=stock,
+                   start_date=start_date,
+                   end_date=end_date,
+                   criteria='Adj Close')
 
 # Overview
 get_return(stock)
@@ -41,15 +41,15 @@ n_sim = 1000
 days = 60
 
 # Simulation
-price = simulation(data = stock, 
-                   days = days, 
-                   n_sim = n_sim)
+price = simulation(data=stock,
+                   days=days,
+                   n_sim=n_sim)
 
 # Trading
 money = 1e6
-decision = trading_algo(mrx = price)
-final_sim = trading_sim(price = price, 
-                        decision = decision, 
-                        money = money)
+decision = trading_algo(mrx=price)
+final_sim = trading_sim(price=price,
+                        decision=decision,
+                        money=money)
 
 print(final_sim)
