@@ -144,9 +144,9 @@ def simulateStock(req: SimulatePayload):
         optimal_trading_sequence.append({'conf': conf,
                                          'decision': decision})
 
-
-    dates = pd.date_range(dt.datetime.today(), periods = days).to_pydatetime().tolist()
-    for i in range(len(dates)): 
+    dates = pd.date_range(dt.datetime.today(),
+                          periods=days).to_pydatetime().tolist()
+    for i in range(len(dates)):
         dates[i] = dates[i].strftime("%Y-%m-%d")
 
     for sim in range(n_sim):
@@ -154,7 +154,7 @@ def simulateStock(req: SimulatePayload):
                      'data': {'date': list(dates),
                               'price': list(price[sim])},
                      'trading_sequence': list(decisions[sim])})
-        
+
     dct = {'optimal_trading_sequence': optimal_trading_sequence,
            'data': data}
 
@@ -176,7 +176,7 @@ async def simulateTrade(req: TradePayload):
         start_date = '2021-01-01'
 
     if conf_level == '':
-        conf_level == float(99)
+        conf_level == float(95)
 
     end_date = dt.datetime.now().strftime('%Y-%m-%d')
 
@@ -235,7 +235,7 @@ async def simulateTrade(req: TradePayload):
                     "percentage": float(final_sim['PROFIT/LOSS'].iloc[val_min_index]),
                     "final_balance": float(final_sim['FINAL_BALANCE'].iloc[val_min_index])
                 },
-            'var': var_value
+                'var': float(var_value)
             },
         }
     }
