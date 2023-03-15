@@ -162,10 +162,8 @@ def trading_algo(mrx):
 
     for i in range(n_sim):
         j = 1
-        print("Simulation : ", i)
 
         while j != mrx.shape[1] - 1:
-            print(j)
             start = j
             cond = True
 

@@ -1,7 +1,7 @@
 # Import modules
 # Extract stock market data
 from func import fetch_data, check_columns, check_values, expand_data, final_data, get_return, \
-    simulation, generate_decision_sequence, trading_algo, trading_sim, validate_decision
+    simulation, generate_decision_sequence, trading_algo, trading_sim, validate_decision, stock_var
 import yfinance as yf
 
 # Importing and transforming file
@@ -39,6 +39,7 @@ get_return(stock)
 # Simulation
 n_sim = 1000
 days = 60
+conf_level = 0.95
 
 # Simulation
 price = simulation(data=stock,
@@ -48,8 +49,14 @@ price = simulation(data=stock,
 # Trading
 money = 1e6
 decision = trading_algo(mrx=price)
+optimal_decision_sequence = generate_decision_sequence(data=decision, 
+                                                       days=days,
+                                                       n_sim=n_sim,
+                                                       threshold=0.5)
 final_sim = trading_sim(price=price,
-                        decision=decision,
+                        decision=optimal_decision_sequence,
                         money=money)
+var_value = stock_var(final_sim, conf_level)
 
 print(final_sim)
+print(f'Risiko maksimum pada taraf kepercayaan {conf_level}: {var_value}')
