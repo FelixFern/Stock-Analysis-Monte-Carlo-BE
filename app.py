@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 # Extract stock market data
 from func import fetch_data, check_columns, check_values, expand_data, final_data, get_return, \
-    simulation, generate_decision_sequence, trading_algo, trading_sim, validate_decision
+    simulation, generate_decision_sequence, trading_algo, trading_sim, validate_decision, stock_var
 import yfinance as yf
 
 # Importing and transforming file
@@ -30,6 +30,7 @@ class GetDataPayload(BaseModel):
 class SimulatePayload(BaseModel):
     stock: str
     criteria: str
+    threshold = float
     start_date: str
     n_sim: int
     days: int
@@ -43,6 +44,7 @@ class TradePayload(BaseModel):
     days: int
     optimal_trading_sequence: list
     money: int
+    conf_level: float
 
 
 @app.get('/get')
@@ -77,11 +79,15 @@ def simulateStock(req: SimulatePayload):
     stock_name = req.stock
     criteria = req.criteria
     start_date = req.start_date
+    threshold = req.threshold
     n_sim = req.n_sim
     days = req.days
 
     if start_date == '':
         start_date = '2021-01-01'
+
+    # if threshold == '':
+    #     threshold = float(0.5)
 
     end_date = dt.datetime.now().strftime('%Y-%m-%d')
 
@@ -108,25 +114,31 @@ def simulateStock(req: SimulatePayload):
 
     stock = stock.reset_index()
     stock["Date"] = stock["Date"].astype(str)
-    for idx in range(len(decision_sequence)):
-        decision = decision_sequence['DECISION'].iloc[idx]
+    for day in range(days):
+        decision = decision_sequence['DECISION'].iloc[day]
 
         if decision == 0:
-            conf = decision_sequence['HOLD_CONF'].iloc[idx]
+            conf = decision_sequence['HOLD_CONF'].iloc[day]
 
         elif decision == 1:
-            conf = decision_sequence['SELL_CONF'].iloc[idx]
+            conf = decision_sequence['SELL_CONF'].iloc[day]
 
         else:
-            conf = decision_sequence['BUY_CONF'].iloc[idx]
+            conf = decision_sequence['BUY_CONF'].iloc[day]
 
         optimal_trading_sequence.append({'conf': conf,
                                          'decision': decision})
 
-        data.append({'simulation': idx + 1,
-                     'data': {'date': list(stock.iloc[:, 0]),
-                              'price': list(price[idx])},
-                     'trading_sequence': list(decisions[idx])})
+
+    dates = pd.date_range(dt.datetime.today(), periods = days).to_pydatetime().tolist()
+    for i in range(len(dates)): 
+        dates[i] = dates[i].strftime("%Y-%m-%d")
+
+    for sim in range(n_sim):
+        data.append({'simulation': sim + 1,
+                     'data': {'date': list(dates),
+                              'price': list(price[sim])},
+                     'trading_sequence': list(decisions[sim])})
         
     dct = {'optimal_trading_sequence': optimal_trading_sequence,
            'data': data}
@@ -143,9 +155,13 @@ async def simulateTrade(req: TradePayload):
     days = req.days
     optimal_trading_sequence = req.optimal_trading_sequence
     money = req.money
+    conf_level = req.conf_level
 
     if start_date == '':
         start_date = '2021-01-01'
+
+    if conf_level == '':
+        conf_level == float(99)
 
     end_date = dt.datetime.now().strftime('%Y-%m-%d')
 
@@ -180,6 +196,10 @@ async def simulateTrade(req: TradePayload):
                      'final_balance': final_balance,
                      'starting_balance': starting_balance})
 
-    dct = {'data': data}
+    var_value = stock_var(data=final_sim, conf_level=conf_level)
+    dct = {'data': data,
+           'var': {'conf_level': conf_level,
+                   'var': var_value}
+                   }
 
     return dct

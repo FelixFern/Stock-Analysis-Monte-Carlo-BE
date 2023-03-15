@@ -222,7 +222,7 @@ def trading_algo(mrx):
     return res
 
 
-def generate_decision_sequence(data, n_sim, days):
+def generate_decision_sequence(data, n_sim, days, threshold = 0.5):
     decision_df = pd.DataFrame(columns=['DAY', 'DECISION', 'HOLD_CONF', 'BUY_CONF', 'SELL_CONF'],
                                index=[i for i in range(days)])
 
@@ -242,7 +242,7 @@ def generate_decision_sequence(data, n_sim, days):
             else:
                 buy += 1
 
-        if max(buy, sell, hold) == hold and (hold / n_sim) > 0.5:
+        if max(buy, sell, hold) == hold and (hold / n_sim) > threshold:
             decision_df['DECISION'].iloc[i] = 0
 
         elif max(buy, sell) == sell:
@@ -314,7 +314,7 @@ def trading_sim(price, decision, money):
 
 
 def validate_decision(data, days, decision, money, n_sim, n_valid):
-    df = pd.DataFrame(columns = ['SIMULATION', 'WINNING_PERC', 'MAX_RETURN', 'MIN_RETURN'],
+    df = pd.DataFrame(columns=['SIMULATION', 'WINNING_PERC', 'MAX_RETURN', 'MIN_RETURN'],
                       index=[i for i in range(n_valid)])
     for i in range(n_valid):
         validate = simulation(data = data, days = days, n_sim = n_sim)
@@ -330,5 +330,13 @@ def validate_decision(data, days, decision, money, n_sim, n_valid):
         df['MIN_RETURN'].iloc[i] = min_return
 
     return df
+
+
+def stock_var(data, conf_level):
+    res = data['PROFIT/LOSS'] / 100
+    money = data['STARTING_BALANCE'][0]
+    var = np.percentile(res, 100 - conf_level)
+
+    return var * money
 
 # ------------------------------------------------------------------------------------------------- #
