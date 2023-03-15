@@ -103,7 +103,7 @@ def simulateStock():
                 conf = decision_sequence['BUY_CONF'].iloc[idx]
 
             optimal_trading_sequence.append({'conf': conf,
-                                               'decision': decision})
+                                             'decision': decision})
 
             data.append({'simulation': idx + 1,
                          'data': {'date': list(stock.reset_index().iloc[:, 0]),

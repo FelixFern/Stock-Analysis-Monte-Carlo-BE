@@ -159,22 +159,17 @@ def trading_algo(mrx):
     '''
     res = np.zeros((mrx.shape[0], mrx.shape[1]))
     n_sim = mrx.shape[0]
-
     for i in range(n_sim):
         j = 1
-
         while j != mrx.shape[1] - 1:
             start = j
             cond = True
-
             # Check increasing
             if mrx[i, j] > mrx[i, j - 1]:
                 while cond:
-
                     # Still increasing and not at the end
                     if (mrx[i, j] > mrx[i, j - 1]) & (j != mrx.shape[1] - 1):
                         j = j + 1
-
                     # At the end or price dropped
                     else:
                         # Still increasing at the end, sell
@@ -182,21 +177,17 @@ def trading_algo(mrx):
                             res[i, j] = 1
                             res[i, start: j] = 0
                             cond = False
-
                         # Price dropped, sell at prev price
                         else:
                             res[i, j - 1] = 1
                             res[i, start: j - 1] = 0
                             cond = False
-
             # Check decreasing
             else:
                 while cond:
-
                     # Still decreasing and not at the end
                     if (mrx[i, j] < mrx[i, j - 1]) & (j != mrx.shape[1] - 1):
                         j = j + 1
-
                     # At the end or price increased
                     else:
                         # Still decreasing at the end, buy
@@ -204,13 +195,11 @@ def trading_algo(mrx):
                             res[i, j] = 2
                             res[i, start: j] = 0
                             cond = False
-
                         # Price increased, buy at prev price
                         else:
                             res[i, j - 1] = 2
                             res[i, start: j - 1] = 0
                             cond = False
-
     return res
 
 
