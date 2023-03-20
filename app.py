@@ -115,7 +115,8 @@ def simulateStock(req: SimulatePayload):
                        end_date=end_date,
                        criteria=criteria)
 
-    stock = get_return(stock)
+    stock = get_return(data=stock, 
+                       method='log')
 
     # print(stock)
     price = simulation(data=stock,
@@ -189,7 +190,8 @@ async def simulateTrade(req: TradePayload):
                        end_date=end_date,
                        criteria=criteria)
 
-    stock = get_return(stock)
+    stock = get_return(data=stock, 
+                       method='log')
 
     # Kalau pakai data baru
     price = simulation(data=stock,

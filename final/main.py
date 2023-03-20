@@ -34,11 +34,12 @@ stock = final_data(data=stock,
                    criteria='Adj Close')
 
 # Overview
-get_return(stock)
+stock = get_return(data=stock, 
+                   method='log')
 
 # Simulation
-n_sim = 1000
-days = 60
+n_sim = 1e4
+days = 30
 conf_level = 0.95
 
 # Simulation
@@ -47,7 +48,7 @@ price = simulation(data=stock,
                    n_sim=n_sim)
 
 # Trading
-money = 1e6
+money = 1e8
 decision = trading_algo(mrx=price)
 optimal_decision_sequence = generate_decision_sequence(data=decision, 
                                                        days=days,
