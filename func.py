@@ -96,7 +96,7 @@ def final_data(data, start_date, end_date, criteria):
     return data[[criteria]]
 
 
-def get_return(data):
+def get_return(data, method):
     data['Daily Return'] = (
         data.iloc[:, 0] - data.iloc[:, 0].shift(1)) / data.iloc[:, 0].shift(1)
 
