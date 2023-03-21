@@ -115,7 +115,7 @@ def get_return(data):
 # Monte Carlo Simulation
 
 
-def simulation(data, days, n_sim):
+def simulation(data, days, n_sim):   
     start_price = data.iloc[-1, 0]
     sim = np.zeros(n_sim)
     table = np.zeros((n_sim, days))
@@ -123,33 +123,23 @@ def simulation(data, days, n_sim):
     delta = 1 / days
     mu = data['Daily Return'].mean()
     sigma = data['Daily Return'].std()
-
-    def monte_carlo(start_price, days, mu=mu, sigma=sigma):
+    
+    def monte_carlo(start_price, days, mu = mu, sigma = sigma):
         price = np.zeros(days)
         price[0] = start_price
-
-        shock = np.zeros(days)
-        drift = np.zeros(days)
-
+        
+        shock = np.array([np.random.normal(loc = 0, scale = 1) for _ in range(days)])
+        drift = np.array([(mu - 1 / 2 * sigma ** 2) for _ in range(days)])
+        
         for x in range(1, days):
-            shock[x] = np.random.normal(
-                loc=mu * delta, scale=sigma * np.sqrt(delta))
-            drift[x] = mu * delta
-
-            price[x] = price[x - 1] + (price[x - 1] * (drift[x] + shock[x]))
-
+            price[x] = price[0] * np.exp(drift[x] * x + sigma * np.sum(shock[:x]))
+            
         return price
 
-    # plt.figure(figsize = (15, 8))
     for i in range(n_sim):
         result = monte_carlo(start_price, days)
         table[i] = result
         sim[i] = result[days - 1]
-    #     plt.plot(result)
-
-    # plt.xlabel('Days')
-    # plt.ylabel('Price')
-    # plt.title('Monte Carlo Analysis')
 
     return table
 
