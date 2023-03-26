@@ -9,6 +9,11 @@ import pandas as pd
 import numpy as np
 import datetime as dt  # Datetime manipulation
 
+# Chatbot
+import random
+import nltk
+from nltk.stem import WordNetLemmatizer
+
 # Plotting
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -328,3 +333,67 @@ def stock_var(data, conf_level):
     return var * money
 
 # ------------------------------------------------------------------------------------------------- #
+# Chatbot
+
+
+def lemmatize_sentence(sentence):
+    # Break the sentence into parts
+    lemmatizer = WordNetLemmatizer()
+    word_pattern = nltk.word_tokenize(sentence)
+    word_patterns = [lemmatizer.lemmatize(word) for word in word_pattern]
+
+    return word_patterns
+
+
+def words_bag(sentence, words):
+    word_patterns = lemmatize_sentence(sentence)
+    bag = [0 for _ in range(len(words))]
+    
+    # Match the sentence given with existing 'dictionary' of words
+    for pattern in word_patterns:
+        for idx, word in enumerate(words):
+            if word == pattern:
+                bag[idx] = 1
+
+    return bag
+
+
+def predict_tag(model, sentence, words, tags):
+    # Lemmatize the sentence and make it a 2D numpy array
+    bag = words_bag(sentence, words)
+    data = np.array([bag])
+
+    # Predict the intent
+    result = model.predict(data)[0]
+
+    # Error threshold, only fetch the result if the probability exceeds the threshold
+    threshold = 0.25
+    results = [[res, prob] for res, prob in enumerate(result) if prob > threshold]
+    results.sort(key=lambda x: x[1], reverse=True)
+
+    # Store the possible intents from the most possible one,
+    # indicated by highest probability from the previous line
+    intents_lst = []
+    for result in results:
+        intents_lst.append({
+            'intent': tags[result[0]],
+            'prob': result[1]
+        })
+
+    return intents_lst
+
+
+def get_response(intents_lst, intents_json):
+    # Get the highest score at top
+    tag = intents_lst[0]['intent']
+    intents = intents_json['intents']
+
+    response = ''
+    for intent in intents:
+        if intent['tag'] == tag:
+            # Randomly pick the responses from intents.json file
+            # which corresponds to specific tag
+            response = random.choice(intent['responses'])
+            break
+
+    return response

@@ -2,12 +2,12 @@ import pickle
 import numpy as np
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Activation
-from tensorflow.keras.optimizers import Adam, SGD
+from tensorflow.keras.layers import Dense, Activation, BatchNormalization, Dropout
+from tensorflow.keras.optimizers import Adam
 
 # Load dataset
 file = open('training.pkl', 'rb')
-data = pickle.load(file)
+data = pickle.load(file=file)
 file.close()
 
 # Get predictor and target
@@ -16,35 +16,48 @@ y = np.array([item[1] for item in data])
 
 # Model
 model = Sequential()
-optimizer = Adam()
+optimizer = Adam(
+    learning_rate=0.005,
+    beta_1=0.9,
+    beta_2=0.999
+)
+
+# Input Layer
+model.add(Dense(units=128, input_shape=(len(X[0]),)))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(Dropout(0.25))
 
 # Hidden Layer
-model.add(Dense(
-    units=32,
-    input_shape=(10,),
-    activation='relu'
-))
-model.add(Dense(
-    units=32,
-    input_shape=(10,),
-    activation='relu'
-))
-model.add(Dense(
-    units=32,
-    input_shape=(10,),
-    activation='relu'
-))
+# 1
+model.add(Dense(units=64))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(Dropout(0.25))
+
+# 2
+model.add(Dense(units=64))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
 
 # Output Layer
-model.add(
-    units=1,
-    name='output_layer',
-    activation='sigmoid'
-)
+model.add(Dense(units=len(y[0])))
+model.add(Activation('softmax'))
 
 # Evaluate Model
 model.compile(
-    loss='mean_absolute_error',
+    loss='categorical_crossentropy',
     optimizer=optimizer,
-    metric=['mean_absolute_error']
+    metrics=['accuracy']
 )
+
+# Fit & Save Model
+hist = model.fit(
+    X, y, 
+    epochs=200,
+    batch_size=5,
+    verbose=1
+)
+
+model.save('chatbot_model.h5', hist)
+print("Model has been saved successfully.")
