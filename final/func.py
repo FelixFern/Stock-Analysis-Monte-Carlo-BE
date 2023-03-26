@@ -126,6 +126,7 @@ def simulation(data, days, n_sim):
     delta = 1 / days
     mu = data['Daily Return'].mean()
     sigma = data['Daily Return'].std()
+    
     def monte_carlo(start_price, days, mu = mu, sigma = sigma):
         price = np.zeros(days)
         price[0] = start_price

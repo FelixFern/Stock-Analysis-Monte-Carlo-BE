@@ -1,0 +1,39 @@
+{
+    "intents": [
+    {
+        "tag": "greetings",
+        "patterns": [
+            "hi", "hey", "hello", "good day", "bonjour", "how is it going"
+        ],
+        "responses": [
+            "Hello! Welcome to the project website"
+        ]
+    },
+    {
+        "tag": "identity",
+        "patterns": [
+            "who are you"
+        ],
+        "responses": [
+            "a"
+        ]
+    },
+    {
+        "tag": "project",
+        "patterns": [
+            "what is this project?", "can you explain this project", "what is this about"
+        ],
+        "responses": [
+            "yes"
+        ]
+    },
+    {
+        "tag": "mechanism",
+        "patterns": [
+            "how does this work?", "how can i use this?", "can you explain how to use this?"
+    ],
+        "responses": [
+            "check"
+        ]
+    }
+]}
