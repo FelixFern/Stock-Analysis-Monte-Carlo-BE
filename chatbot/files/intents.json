@@ -1,58 +1,106 @@
 {
-    "intents": [
+  "intents": [
     {
-        "tag": "greetings",
-        "patterns": [
-            "hi", "hey", "hello", "good day", "bonjour", "how is it going", "nice to meet you"
-        ],
-        "responses": [
-            "Hello, welcome to the project website!",
-            "Good day, welcome aboard!",
-            "Nice to meet you, I am glad to have you here!"
-        ]
+      "tag": "greetings",
+      "patterns": [
+        "Hi",
+        "Hi there",
+        "Hey",
+        "Hello",
+        "Good day",
+        "Bonjour",
+        "How is it going",
+        "Nice to meet you",
+        "Hola"
+      ],
+      "responses": [
+        "Hello, welcome to the project website!",
+        "Good day, welcome aboard!",
+        "Nice to meet you, I am glad to have you here!",
+        "Hi there, thanks for visiting here!"
+      ]
     },
     {
-        "tag": "identity",
-        "patterns": [
-            "who are you", "can you tell me your name", "what is your name", "please introduce yourself"
-        ],
-        "responses": [
-            "I am Poi, a chatbot built to guide you through this project web app!",
-            "You can call me Poi. Please do ask me if you have anything to ask regarding this project!",
-            "My creator named me Poi! A magnificent name, is not it?"
-        ]
+      "tag": "identity",
+      "patterns": [
+        "Who are you",
+        "Can you tell me your name",
+        "What is your name",
+        "Please introduce yourself"
+      ],
+      "responses": [
+        "I am Poi, a chatbot built to guide you through this project web app!",
+        "You can call me Poi. Please do ask me if you have anything to ask regarding this project!",
+        "My creator named me Poi! A magnificent name, is not it?"
+      ]
     },
     {
-        "tag": "purpose",
-        "patterns": [
-            "what can you do for me", "what are you doing here", 
-            "what is your purpose here", "why are you here"
-        ],
-        "responses": [
-            "My purpose is to guide you through this project web app!",
-            "I can answer your questions about anything regarding this project!",
-            "I am here to accompany you throughout your visit here!"
-        ]
+      "tag": "purpose",
+      "patterns": [
+        "What can you do for me",
+        "What are you doing here",
+        "What is your purpose here",
+        "Why are you here"
+      ],
+      "responses": [
+        "My purpose is to guide you through this project web app!",
+        "I can answer your questions about anything regarding this project!",
+        "I am here to accompany you throughout your visit here!"
+      ]
     },
     {
-        "tag": "project",
-        "patterns": [
-            "what is this project?", "can you explain this project", "what is this about",
-            ""
-        ],
-        "responses": [
-            "This is a project made by Moch Nabil Farras Dhiya (10120034) and Felix Fernando (10120082) to utilize Monte Carlo method to make a trading simulation. Not stopping there, they also build a trading algorithm so that you will gain the maximum return possible, at certain risk level",
-            "Moch Nabil Farras Dhiya (10120034) and Felix Fernando (10120082) made this project, an implementation of Monte Carlo method to simulate a trading algorithm so that your return can be maximized, with certain level of risk."
-        ]
+      "tag": "project",
+      "patterns": [
+        "What is this project",
+        "Can you explain this project",
+        "What is this about",
+        "What do you have here"
+      ],
+      "responses": [
+        "This is a project made by Moch Nabil Farras Dhiya (10120034) and Felix Fernando (10120082) to utilize Monte Carlo method to make a trading simulation. Not stopping there, they also build a trading algorithm so that you will gain the maximum return possible, at certain risk level",
+        "Moch Nabil Farras Dhiya (10120034) and Felix Fernando (10120082) made this project, an implementation of Monte Carlo method, to simulate a trading algorithm so that your return can be maximized, with certain level of risk."
+      ]
     },
     {
-        "tag": "prosedure",
-        "patterns": [
-            "how does this project work?", "how can i use this?", "can you explain how to use this?",
-            "what are the features here?", ""
-    ],
-        "responses": [
-            "Please do the following steps:\n "
-        ]
+      "tag": "procedure",
+      "patterns": [
+        "How does this project work",
+        "How can i use this",
+        "Can you explain how to use this",
+        "What are the features here",
+        ""
+      ],
+      "responses": ["Please do the following steps:\n "]
+    },
+    {
+      "tag": "monte carlo",
+      "patterns": ["monte carlo"],
+      "responses": ["Checkpoint 1"]
+    },
+    {
+      "tag": "trading",
+      "patterns": ["trading"],
+      "responses": ["Checkpoint 2"]
+    },
+    {
+      "tag": "pros",
+      "patterns": ["pros"],
+      "responses": ["Checkpoint 3"]
+    },
+    {
+      "tag": "cons",
+      "patterns": ["cons"],
+      "responses": ["Checkpoint 4"]
+    },
+    {
+      "tag": "unknown",
+      "patterns": [""],
+      "responses": [
+        "Sorry, I did not catch that ...",
+        "Excuse me, can you paraphrase what you just said?",
+        "My bad, I don't follow ...",
+        "Gomen, I did not get what you mean ..."
+      ]
     }
-]}
+  ]
+}

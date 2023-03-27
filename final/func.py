@@ -9,6 +9,11 @@ import pandas as pd
 import numpy as np
 import datetime as dt  # Datetime manipulation
 
+# Chatbot
+import random
+import nltk
+from nltk.stem import WordNetLemmatizer
+
 # Plotting
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -97,17 +102,14 @@ def final_data(data, start_date, end_date, criteria):
 
 
 def get_return(data, method):
-    if method == 'log':
-        data['Daily Return'] = np.log(data.iloc[:, 0] / data.iloc[:, 0].shift(1))
-    
-    elif method == 'relative':
-        data['Daily Return'] = (data.iloc[:, 0] - data.iloc[:, 0].shift(1)) / data.iloc[:, 0].shift(1)
-    
-    # data = data.dropna()
+    data['Daily Return'] = (
+        data.iloc[:, 0] - data.iloc[:, 0].shift(1)) / data.iloc[:, 0].shift(1)
 
-    # sns.displot(data['Daily Return'].dropna(), 
+    data = data.dropna()
+
+    # sns.displot(data['Daily Return'].dropna(),
     #             bins = 50,
-    #             color = 'blue', 
+    #             color = 'blue',
     #             kde = True)
     # plt.title('Daily return distribution')
     # plt.show()
@@ -118,7 +120,7 @@ def get_return(data, method):
 # Monte Carlo Simulation
 
 
-def simulation(data, days, n_sim):   
+def simulation(data, days, n_sim):
     start_price = data.iloc[-1, 0]
     sim = np.zeros(n_sim)
     table = np.zeros((n_sim, days))
@@ -126,17 +128,19 @@ def simulation(data, days, n_sim):
     delta = 1 / days
     mu = data['Daily Return'].mean()
     sigma = data['Daily Return'].std()
-    
-    def monte_carlo(start_price, days, mu = mu, sigma = sigma):
+
+    def monte_carlo(start_price, days, mu=mu, sigma=sigma):
         price = np.zeros(days)
         price[0] = start_price
-        
-        shock = np.array([np.random.normal(loc = 0, scale = 1) for _ in range(days)])
+
+        shock = np.array([np.random.normal(loc=0, scale=1)
+                         for _ in range(days)])
         drift = np.array([(mu - 1 / 2 * sigma ** 2) for _ in range(days)])
-        
+
         for x in range(1, days):
-            price[x] = price[0] * np.exp(drift[x] * x + sigma * np.sum(shock[:x]))
-            
+            price[x] = price[0] * \
+                np.exp(drift[x] * x + sigma * np.sum(shock[:x]))
+
         return price
 
     for i in range(n_sim):
@@ -158,17 +162,24 @@ def trading_algo(mrx):
     '''
     res = np.zeros((mrx.shape[0], mrx.shape[1]))
     n_sim = mrx.shape[0]
+
     for i in range(n_sim):
         j = 1
+        print("Simulation : ", i)
+
         while j != mrx.shape[1] - 1:
+            print(j)
             start = j
             cond = True
+
             # Check increasing
             if mrx[i, j] > mrx[i, j - 1]:
                 while cond:
+
                     # Still increasing and not at the end
                     if (mrx[i, j] > mrx[i, j - 1]) & (j != mrx.shape[1] - 1):
                         j = j + 1
+
                     # At the end or price dropped
                     else:
                         # Still increasing at the end, sell
@@ -176,17 +187,21 @@ def trading_algo(mrx):
                             res[i, j] = 1
                             res[i, start: j] = 0
                             cond = False
+
                         # Price dropped, sell at prev price
                         else:
                             res[i, j - 1] = 1
                             res[i, start: j - 1] = 0
                             cond = False
+
             # Check decreasing
             else:
                 while cond:
+
                     # Still decreasing and not at the end
                     if (mrx[i, j] < mrx[i, j - 1]) & (j != mrx.shape[1] - 1):
                         j = j + 1
+
                     # At the end or price increased
                     else:
                         # Still decreasing at the end, buy
@@ -194,11 +209,13 @@ def trading_algo(mrx):
                             res[i, j] = 2
                             res[i, start: j] = 0
                             cond = False
+
                         # Price increased, buy at prev price
                         else:
                             res[i, j - 1] = 2
                             res[i, start: j - 1] = 0
                             cond = False
+
     return res
 
 
@@ -257,15 +274,13 @@ def trading_sim(price, decision, money):
 
         for j in range(days):
             # Hold
-            if decision['DECISION'].iloc[j] == 0:
+            if decision[j]["decision"] == 0:
                 pass
 
             # Sell
-            elif decision['DECISION'].iloc[j] == 1:
+            elif decision[j]["decision"] == 1:
                 # Proportion of sell decision at given day
-                factor = decision['SELL_CONF'].iloc[j] / \
-                    (decision['SELL_CONF'].iloc[j] +
-                     decision['BUY_CONF'].iloc[j])
+                factor = decision[j]["conf"]
                 curr_price = price[i, j]
                 curr_money += stock * factor * curr_price
                 stock -= stock * factor
@@ -273,9 +288,7 @@ def trading_sim(price, decision, money):
             # Buy
             else:
                 # Proportion of buy decision at given day
-                factor = decision['BUY_CONF'].iloc[j] / \
-                    (decision['SELL_CONF'].iloc[j] +
-                     decision['BUY_CONF'].iloc[j])
+                factor = decision[j]["conf"]
                 curr_price = price[i, j]
                 stock += factor * curr_money / curr_price
                 curr_money -= factor * curr_money
@@ -322,3 +335,78 @@ def stock_var(data, conf_level):
     return var * money
 
 # ------------------------------------------------------------------------------------------------- #
+# Chatbot
+
+
+def lemmatize_sentence(sentence):
+    # Break the sentence into parts
+    lemmatizer = WordNetLemmatizer()
+    word_pattern = nltk.word_tokenize(sentence)
+    word_patterns = [lemmatizer.lemmatize(word) for word in word_pattern]
+
+    return word_patterns
+
+
+def words_bag(sentence, words):
+    word_patterns = lemmatize_sentence(sentence)
+    bag = [0 for _ in range(len(words))]
+
+    # Match the sentence given with existing 'dictionary' of words
+    for pattern in word_patterns:
+        for idx, word in enumerate(words):
+            if word == pattern:
+                bag[idx] = 1
+
+    return bag
+
+
+def predict_tag(model, sentence, words, tags):
+    # Lemmatize the sentence and make it a 2D numpy array
+    bag = words_bag(sentence, words)
+    data = np.array([bag])
+
+    # Predict the intent
+    result = model.predict(data)[0]
+
+    # Error threshold, only fetch the result if the probability exceeds the threshold
+    threshold = 0.25
+    results = [[res, prob]
+               for res, prob in enumerate(result) if prob > threshold]
+
+    # If there is an answer with prob above the threshold
+    if len(results) != 0:
+        results.sort(key=lambda x: x[1], reverse=True)
+
+        # Store the possible intents from the most possible one,
+        # indicated by highest probability from the previous line
+        intents_lst = []
+        for result in results:
+            intents_lst.append({
+                'intent': tags[result[0]],
+                'prob': result[1]
+            })
+
+    # If not
+    else:
+        intents_lst = [{
+            'intent': 'unknown',
+            'prob': 1
+        }]
+
+    return intents_lst
+
+
+def get_response(intents_lst, intents_json):
+    # Get the highest score at top
+    tag = intents_lst[0]['intent']
+    intents = intents_json['intents']
+
+    response = ''
+    for intent in intents:
+        if intent['tag'] == tag:
+            # Randomly pick the responses from intents.json file
+            # which corresponds to specific tag
+            response = random.choice(intent['responses'])
+            break
+
+    return response

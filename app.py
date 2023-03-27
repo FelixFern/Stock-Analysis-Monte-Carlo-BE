@@ -8,12 +8,20 @@ from func import fetch_data, check_columns, check_values, expand_data, final_dat
     simulation, generate_decision_sequence, trading_algo, trading_sim, validate_decision, stock_var
 import yfinance as yf
 
+# Extract chatbot functions
+from func import lemmatize_sentence, words_bag, predict_tag, get_response
+
 # Importing and transforming file
+import pickle
+import json
 import pandas as pd
 
 # Data manipulation
 import numpy as np
 import datetime as dt  # Datetime manipulation
+
+# Model
+from tensorflow.keras.models import load_model
 
 app = FastAPI()
 
@@ -62,6 +70,10 @@ class TradePayload(BaseModel):
     conf_level: float
 
 
+class ChatBot(BaseModel):
+    sentence: str
+
+
 @app.post('/get')
 async def getData(req: GetDataPayload):
     stock_name = req.stock
@@ -83,8 +95,10 @@ async def getData(req: GetDataPayload):
 
     stock = stock.reset_index()
 
-    dct = {'date': list(stock.iloc[:, 0]),
-           'values': list(stock.iloc[:, 1])}
+    dct = {
+        'date': list(stock.iloc[:, 0]),
+        'values': list(stock.iloc[:, 1])
+    }
 
     return dct
 
@@ -115,7 +129,7 @@ def simulateStock(req: SimulatePayload):
                        end_date=end_date,
                        criteria=criteria)
 
-    stock = get_return(data=stock, 
+    stock = get_return(data=stock,
                        method='log')
 
     # print(stock)
@@ -142,8 +156,10 @@ def simulateStock(req: SimulatePayload):
         else:
             conf = decision_sequence['BUY_CONF'].iloc[day]
 
-        optimal_trading_sequence.append({'conf': conf,
-                                         'decision': decision})
+        optimal_trading_sequence.append({
+            'conf': conf,
+            'decision': decision
+        })
 
     dates = pd.date_range(dt.datetime.today(),
                           periods=days).to_pydatetime().tolist()
@@ -151,10 +167,14 @@ def simulateStock(req: SimulatePayload):
         dates[i] = dates[i].strftime("%Y-%m-%d")
 
     for sim in range(n_sim):
-        data.append({'simulation': sim + 1,
-                     'data': {'date': list(dates),
-                              'price': list(price[sim])},
-                     'trading_sequence': list(decisions[sim])})
+        data.append({
+            'simulation': sim + 1,
+            'data': {
+                'date': list(dates),
+                'price': list(price[sim])
+            },
+            'trading_sequence': list(decisions[sim])
+        })
 
     dct = {'optimal_trading_sequence': optimal_trading_sequence,
            'data': data}
@@ -190,7 +210,7 @@ async def simulateTrade(req: TradePayload):
                        end_date=end_date,
                        criteria=criteria)
 
-    stock = get_return(data=stock, 
+    stock = get_return(data=stock,
                        method='log')
 
     # Kalau pakai data baru
@@ -240,6 +260,41 @@ async def simulateTrade(req: TradePayload):
                 'var': float(var_value)
             },
         }
+    }
+
+    return dct
+
+
+@app.post('/chatbot')
+def chatBot(req: ChatBot):
+    sentence = req.sentence
+
+    # Load data
+    file = open(file='chatbot/files/intents.json')
+    intents = json.load(fp=file)
+    file.close()
+
+    file = open('chatbot/files/tags.pkl', 'rb')
+    tags = pickle.load(file=file)
+    file.close()
+
+    file = open('chatbot/files/words.pkl', 'rb')
+    words = pickle.load(file=file)
+    file.close()
+
+    # Load model
+    model = load_model('chatbot/model/chatbot_model.h5')
+
+    # Predict
+    intent = predict_tag(
+        model=model,
+        sentence=sentence,
+        words=words,
+        tags=tags
+    )
+    response = get_response(intent, intents)
+    dct = {
+        'response': response
     }
 
     return dct

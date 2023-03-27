@@ -10,7 +10,7 @@ from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
 
 # Read files
-file = open(file='intents.json')
+file = open(file='chatbot/files/intents.json')
 intents = json.load(fp=file)
 file.close()
 
@@ -19,8 +19,8 @@ words = []
 tags = []
 documents = []
 ignores = [
-    '[', ']', '@', '-', '_', '!', '#', '$', 
-    '%', '^', '&', '*', '(', ')', '<', '>', 
+    '[', ']', '@', '-', '_', '!', '#', '$',
+    '%', '^', '&', '*', '(', ')', '<', '>',
     '?', '/', '|', '}', '{', '~', ':'
 ]
 
@@ -35,11 +35,13 @@ for intent in intents['intents']:
             tags.append(intent['tag'])
 
 # Lemmatize the words and rid of any duplicates
-cleaned_words = [lemmatizer.lemmatize(word) for word in words if word not in ignores]
+cleaned_words = [lemmatizer.lemmatize(word)
+                 for word in words if word not in ignores]
 cleaned_words = sorted(set(cleaned_words))
 
 # Save temporary cleaned words and tags
-files = [open('words.pkl', 'wb'), open('tags.pkl', 'wb')]
+files = [open('chatbot/files/words.pkl', 'wb'),
+         open('chatbot/files/tags.pkl', 'wb')]
 pickle.dump(obj=cleaned_words, file=files[0])
 pickle.dump(obj=tags, file=files[1])
 
@@ -51,7 +53,8 @@ training = []
 for document in documents:
     bag = []
     word_pattern, tag = document[0], document[1]
-    word_patterns = [lemmatizer.lemmatize(word.lower()) for word in word_pattern]
+    word_patterns = [lemmatizer.lemmatize(
+        word.lower()) for word in word_pattern]
 
     for word in cleaned_words:
         if word in word_patterns:
@@ -69,6 +72,6 @@ for document in documents:
 random.shuffle(training)
 
 # Save the training data
-file = open('training.pkl', 'wb')
+file = open('chatbot/files/training.pkl', 'wb')
 pickle.dump(obj=training, file=file)
 file.close()

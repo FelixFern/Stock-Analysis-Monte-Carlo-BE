@@ -120,7 +120,7 @@ def get_return(data, method):
 # Monte Carlo Simulation
 
 
-def simulation(data, days, n_sim):   
+def simulation(data, days, n_sim):
     start_price = data.iloc[-1, 0]
     sim = np.zeros(n_sim)
     table = np.zeros((n_sim, days))
@@ -128,17 +128,19 @@ def simulation(data, days, n_sim):
     delta = 1 / days
     mu = data['Daily Return'].mean()
     sigma = data['Daily Return'].std()
-    
-    def monte_carlo(start_price, days, mu = mu, sigma = sigma):
+
+    def monte_carlo(start_price, days, mu=mu, sigma=sigma):
         price = np.zeros(days)
         price[0] = start_price
-        
-        shock = np.array([np.random.normal(loc = 0, scale = 1) for _ in range(days)])
+
+        shock = np.array([np.random.normal(loc=0, scale=1)
+                         for _ in range(days)])
         drift = np.array([(mu - 1 / 2 * sigma ** 2) for _ in range(days)])
-        
+
         for x in range(1, days):
-            price[x] = price[0] * np.exp(drift[x] * x + sigma * np.sum(shock[:x]))
-            
+            price[x] = price[0] * \
+                np.exp(drift[x] * x + sigma * np.sum(shock[:x]))
+
         return price
 
     for i in range(n_sim):
@@ -348,7 +350,7 @@ def lemmatize_sentence(sentence):
 def words_bag(sentence, words):
     word_patterns = lemmatize_sentence(sentence)
     bag = [0 for _ in range(len(words))]
-    
+
     # Match the sentence given with existing 'dictionary' of words
     for pattern in word_patterns:
         for idx, word in enumerate(words):
@@ -368,17 +370,28 @@ def predict_tag(model, sentence, words, tags):
 
     # Error threshold, only fetch the result if the probability exceeds the threshold
     threshold = 0.25
-    results = [[res, prob] for res, prob in enumerate(result) if prob > threshold]
-    results.sort(key=lambda x: x[1], reverse=True)
+    results = [[res, prob]
+               for res, prob in enumerate(result) if prob > threshold]
 
-    # Store the possible intents from the most possible one,
-    # indicated by highest probability from the previous line
-    intents_lst = []
-    for result in results:
-        intents_lst.append({
-            'intent': tags[result[0]],
-            'prob': result[1]
-        })
+    # If there is an answer with prob above the threshold
+    if len(results) != 0:
+        results.sort(key=lambda x: x[1], reverse=True)
+
+        # Store the possible intents from the most possible one,
+        # indicated by highest probability from the previous line
+        intents_lst = []
+        for result in results:
+            intents_lst.append({
+                'intent': tags[result[0]],
+                'prob': result[1]
+            })
+
+    # If not
+    else:
+        intents_lst = [{
+            'intent': 'unknown',
+            'prob': 1
+        }]
 
     return intents_lst
 
