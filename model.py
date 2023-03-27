@@ -15,34 +15,38 @@ X = np.array([item[0] for item in data])
 y = np.array([item[1] for item in data])
 
 # Model
-model = Sequential()
+model = Sequential(
+    layers=(
+    # Hidden Layer
+    # 1
+    Dense(units=128, input_shape=(len(X[0]),)),
+    BatchNormalization(),
+    Activation('relu'),
+    Dropout(0.25),
+
+    # 2
+    Dense(units=64),
+    BatchNormalization(),
+    Activation('relu'),
+    Dropout(0.25),
+
+    # 3
+    Dense(units=64),
+    BatchNormalization(),
+    Activation('relu'),
+
+    # Output Layer
+    Dense(units=len(y[0])),
+    Activation('softmax')
+    )
+)
+
+# Optimization
 optimizer = Adam(
     learning_rate=0.005,
     beta_1=0.9,
     beta_2=0.999
 )
-
-# Input Layer
-model.add(Dense(units=128, input_shape=(len(X[0]),)))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
-model.add(Dropout(0.25))
-
-# Hidden Layer
-# 1
-model.add(Dense(units=64))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
-model.add(Dropout(0.25))
-
-# 2
-model.add(Dense(units=64))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
-
-# Output Layer
-model.add(Dense(units=len(y[0])))
-model.add(Activation('softmax'))
 
 # Evaluate Model
 model.compile(
